@@ -1,35 +1,19 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Posts } from "./Posts";
-import { PostDetailPage } from "./PostDetailPage";
-import "./App.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React from 'react';
+import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { routeTree } from './routeTree.gen.js';
 
-const queryClient = new QueryClient()
+// Create the router instance
+const router = createRouter({ 
+  routeTree,
+  defaultPreload: 'intent', // Preload routes on hover/focus
+  defaultPreloadStaleTime: 0, // Always preload fresh data
+});
 
+// Router instance created with route tree configuration
+
+// Main App component
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="app">
-          <header className="app-header">
-            <div className="app-header__container">
-              <h1 className="app-title">Blog 'em Ipsum</h1>
-            </div>
-          </header>
-          <main className="app-main">
-            <Routes>
-              <Route path="/" element={
-                <div className="app-container">
-                  <Posts />
-                </div>
-              } />
-              <Route path="/post/:postId" element={<PostDetailPage />} />
-            </Routes>
-          </main>
-        </div>
-      </Router>
-    </QueryClientProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

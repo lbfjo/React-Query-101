@@ -1,39 +1,4 @@
-export async function fetchPosts(pageNum = 1) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/posts?_limit=10&_page=${pageNum}`
-  );
-  return response.json();
-}
+// Legacy API file - kept for backward compatibility
+// New code should use the improved API structure in lib/api.js
 
-export async function fetchComments(postId) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/comments?postId=${postId}`
-  );
-  return response.json();
-}
-
-export async function deletePost(postId) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/posts/${postId}`,
-    { method: "DELETE" }
-  );
-  return response.json();
-}
-
-export async function updatePost(post) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/posts/${post.id}`,
-    { 
-      method: "PATCH",
-      body: JSON.stringify({
-        title: post.title,
-        body: post.body,
-        userId: post.userId,
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    }
-  );
-  return response.json();
-}
+export { fetchPosts, fetchPost, fetchComments, updatePost, deletePost } from './lib/api.js';
