@@ -1,26 +1,17 @@
 import { useState, useEffect } from "react";
-import { useQuery, useQueryClient,useMutation } from "@tanstack/react-query";
-import { fetchPosts, deletePost, updatePost } from "./api";
-import { PostDetail } from "./PostDetail";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { fetchPosts } from "./api";
+
 const maxPostPage = 10;
 
 export function Posts() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedPost, setSelectedPost] = useState(null);
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["posts",currentPage],
+    queryKey: ["posts", currentPage],
     queryFn: () => fetchPosts(currentPage),
     staleTime: 2000,
-  });
-
-  const deletePostMutation = useMutation({
-    mutationFn: (postId) => deletePost(postId),
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries({ queryKey: ["posts"] });
-    // },
-  });
-  const updatePostMutation = useMutation({
-    mutationFn: (postId) => updatePost(postId),
   });
 
   const queryClient = useQueryClient();
@@ -33,38 +24,67 @@ export function Posts() {
         queryFn: () => fetchPosts(nextPage),
       });
     }
-  }, [currentPage,queryClient]);
+  }, [currentPage, queryClient]);
+
+  const handlePostClick = (postId) => {
+    navigate(`/post/${postId}`);
+  };
+
   if (isLoading) {
-    return <h3>Loading....</h3>;
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading posts...</p>
+      </div>
+    );
   }
+
   if (isError) {
-    return <h3>Error fetching posts</h3>;
+    return (
+      <div className="error-container">
+        <div className="error-icon">⚠️</div>
+        <p className="error-text">Error fetching posts</p>
+      </div>
+    );
   }
-  
+
   return (
-    <>
-      <ul>
+    <div className="posts-section">
+      <div className="posts-list">
         {data.map((post) => (
-          <li
+          <div
             key={post.id}
-            className="post-title"
-            onClick={() => {deletePostMutation.reset(); updatePostMutation.reset(); setSelectedPost(post);}}
+            className="post-card"
+            onClick={() => handlePostClick(post.id)}
           >
-            {post.title}
-          </li>
+            <h3 className="post-card__title">{post.title}</h3>
+            <div className="post-card__meta">
+              <span className="post-card__badge">Post #{post.id}</span>
+              <span>Click to view details</span>
+            </div>
+          </div>
         ))}
-      </ul>
-      <div className="pages">
-        <button disabled={currentPage <= 1} onClick={() => {setCurrentPage(previousValue => previousValue - 1)}}>
-          Previous page
+      </div>
+
+      <div className="pagination">
+        <button
+          className="pagination__button"
+          disabled={currentPage <= 1}
+          onClick={() => setCurrentPage(previousValue => previousValue - 1)}
+        >
+          ← Previous
         </button>
-        <span>Page {currentPage}</span>
-        <button disabled={currentPage >= maxPostPage} onClick={() => {setCurrentPage(currentPage + 1)}}>
-          Next page
+        <div className="pagination__info">
+          Page {currentPage} of {maxPostPage}
+        </div>
+        <button
+          className="pagination__button"
+          disabled={currentPage >= maxPostPage}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          Next →
         </button>
       </div>
-      <hr />
-      {selectedPost && <PostDetail post={selectedPost} deletePostMutation={deletePostMutation} updatePostMutation={updatePostMutation} />}
-    </>
+    </div>
   );
 }
